@@ -2,10 +2,11 @@
 import argparse
 from os import remove
 from pathlib import Path
+from queue import PriorityQueue
 from time import sleep
 import numpy as np
 
-ver = "1.0.0"
+ver = "1.0.1"
 author = "Valentin Reichenbach"
 description = f"""
 TODO: Insert description
@@ -45,6 +46,7 @@ def debugMode(args):
     writeToDebugFile(debugFile=debugFile, content=1, args=args)
     lastVal = 1
 
+    print('Starting...')
     try:
         while True:
             # Writes a random value to the debugfile
@@ -54,7 +56,12 @@ def debugMode(args):
             sleep(args.delay)
     except KeyboardInterrupt:
         print('\nKeyboard interrupt detected\nExiting...')
-        #TODO: necessary cleanup?
+        # Cleanup
+        if args.no_delete == False:
+            try:
+                remove(debugFile)
+            except Exception as e:
+                print(f'Something went wrong while deleting {debugFile}!\n{e}')
         exit()
 
 
@@ -87,6 +94,7 @@ def main():
     # debug mode
     debugParser = subparsers.add_parser('debug', help='controls a test enviroment instead of the epics interface', parents=[parentParser])
     debugParser.add_argument('-f', '--file', type=str, default='debugEnv.txt', help='simulates a debug enviroment for a controller script using a file called "debugEnv.txt"')
+    debugParser.add_argument('--no-delete', action='store_true', default=False, help='doesn\'t delete the debug env file after running the program')
 
 
     args = parser.parse_args()
