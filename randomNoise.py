@@ -2,7 +2,6 @@
 import argparse
 from os import remove
 from pathlib import Path
-from queue import PriorityQueue
 from time import sleep
 import numpy as np
 
