@@ -2,13 +2,17 @@
 import argparse
 from os import remove
 from pathlib import Path
+from queue import PriorityQueue
 from time import sleep
 import numpy as np
+from epics import caput
 
-ver = "1.0.1"
+ver = "1.1.0"
 author = "Valentin Reichenbach"
 description = f"""
-TODO: Insert description
+This program is used to generate noise for a PV in an epics system.
+In normal mode it will apply the noise to a given PV.
+In debug mode it will continuously write to a given text file to simulate a debug enviroment.
 """
 epilog = f"""
 Author: {author}
@@ -65,9 +69,24 @@ def debugMode(args):
 
 
 def normalMode(args):
-    # TODO: normal mode
-    print('normal mode not yet implemented\nExiting...')
-    exit()
+    if args.force == False:
+        print('normal mode is currently not tested. Use the --force flag to force the program to run')
+        print('Exiting...')
+        exit()
+
+    lastVal = 0
+
+    try:
+        while True:
+            # Writes a random value to the debugfile
+            r = lastVal + generateNoise(args=args)
+            caput(args.pv, r)
+            lastVal = r
+            sleep(args.delay)
+    except KeyboardInterrupt:
+        print('\nKeyboard interrupt detected\nExiting...')
+        # Cleanup
+        exit()
 
 def main():
     parser = argparse.ArgumentParser(

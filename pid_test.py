@@ -191,7 +191,6 @@ def main():
     if args.mode == 'debug':
         debugMode(args)
     elif args.mode == 'normal':
-        print(args)
         normalMode(args)
     else:
         print('Something went wrong while parsing the arguments\nExiting...')
