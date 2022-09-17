@@ -1,16 +1,13 @@
 #!/usr/bin/python3
-from cProfile import label
-import graphlib
-from lib2to3.pgen2.token import RPAR
+from os import remove
 import epics
 from simple_pid import PID
-from perlin_noise import PerlinNoise
 import argparse
 from pathlib import Path
 from time import sleep, time
 import matplotlib.pyplot as plt
 
-ver = "0.1.0"
+ver = "0.1.1"
 author = "Valentin Reichenbach"
 description = f"""
 TODO: Insert description
@@ -71,6 +68,12 @@ def debugMode(args):
             f = open(debugFile, 'w')
             f.write(str(correctVal))
             f.close()
+
+            if args.log == True:
+                logFile = Path(args.log_file)
+                l = open(logFile, 'a')
+                l.write(f'Time: {time()} | corrected Value: {correctVal}\n')
+                l.close()
             
             
             # plotting
@@ -132,20 +135,28 @@ def main():
     
     # general options
     parentParser.add_argument('--visulize', action='store_true', default=False, help='visulize the changed values live')
-    parentParser.add_argument('-p', '--proportional', type=float, default=0.7,
-                        help='specifys the coefficient for the proportional term')
-    parentParser.add_argument('-i', '--integral', type=float, default=0.3,
-                        help='specifys the coefficient for the integral term')
-    parentParser.add_argument('-d', '--derivative', type=float, default=0,
-                        help='specifys the coefficient for the derivative term')
-    parentParser.add_argument('-n', '--niveau', type=float, default=1,
-                        help='specifys the niveau that the PID controler should aim for')
-    parentParser.add_argument('--min', type=float, default=-3,
-                        help='specifys the minimum value for the PID controller')
-    parentParser.add_argument('--max', type=float, default=3,
-                        help='specifys the maximum value for the PID controller')
     parentParser.add_argument('--version', action='version', version=ver)
     parentParser.add_argument('-v', '--verbose', action='count', default=0, help='verbose output')
+
+    # PID controller options
+    pidControllerOptions = parentParser.add_argument_group('PID-Controller options')
+    pidControllerOptions.add_argument('-p', '--proportional', type=float, default=0.7,
+                        help='specifys the coefficient for the proportional term')
+    pidControllerOptions.add_argument('-i', '--integral', type=float, default=0.3,
+                        help='specifys the coefficient for the integral term')
+    pidControllerOptions.add_argument('-d', '--derivative', type=float, default=0,
+                        help='specifys the coefficient for the derivative term')
+    pidControllerOptions.add_argument('-n', '--niveau', type=float, default=1,
+                        help='specifys the niveau that the PID controler should aim for')
+    pidControllerOptions.add_argument('--min', type=float, default=-3,
+                        help='specifys the minimum value for the PID controller')
+    pidControllerOptions.add_argument('--max', type=float, default=3,
+                        help='specifys the maximum value for the PID controller')
+    
+    # logging
+    loggingOptions = parentParser.add_argument_group('logging options')
+    loggingOptions.add_argument('--log', action='store_true', default=False, help='the program will log the used values if this flag is used. the default file is "log.txt"')
+    loggingOptions.add_argument('--log-file', type=str, default='log.txt', help='the file used for logging')
     
     # Subcommands
     subparsers = parser.add_subparsers(dest='mode', help='the program can use an epics interface or a debug enviroment controlled by another script')
@@ -163,7 +174,13 @@ def main():
     
     args = parser.parse_args()
 
-    
+    if args.log == True:
+        try:
+            remove(Path(args.log_file))
+        except:
+            pass
+
+
     if args.mode == 'debug':
         debugMode(args)
     elif args.mode == 'normal':
