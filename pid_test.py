@@ -7,7 +7,7 @@ from pathlib import Path
 from time import sleep, time
 import matplotlib.pyplot as plt
 
-ver = "0.1.1"
+ver = "0.1.2"
 author = "Valentin Reichenbach"
 description = f"""
 TODO: Insert description
@@ -20,9 +20,15 @@ License: GPLv3+
 
 def getCurrentVal(args, debugFile: Path=Path('debugEnv.txt')) -> float:
     if args.mode == 'debug':
-        f = open(debugFile, 'r')
-        val = f.read()
-        f.close()
+        # Check if the debug file exists
+        try:
+            f = open(debugFile, 'r')
+            val = f.read()
+            f.close()
+        except Exception as e:
+            print(f'The debug file {debugFile} was not found!\n{e}\nExiting...')
+            exit()
+        
         # BUG: sometimes nothing is read when not in v mode
         try:
             val = float(val)
@@ -35,7 +41,7 @@ def getCurrentVal(args, debugFile: Path=Path('debugEnv.txt')) -> float:
 
         return val
     elif args.mode == 'normal':
-        # TODOO: check pv name
+        # TODO: check pv name
         return epics.caget(f'{args.pv}:outCur')
     else:
         print('Something went wrong while parsing the arguments\nExiting...')
@@ -43,11 +49,10 @@ def getCurrentVal(args, debugFile: Path=Path('debugEnv.txt')) -> float:
 
 
 def debugMode(args):
-    # TODOOOOOOOOOOOO: write debug mode
     debugFile = Path('./' + args.file)
     getCurrentVal(args=args, debugFile=debugFile)
+    # TODOOOO: find sample time and parameters
     pid = PID(Kp=args.proportional, Kd=args.derivative, Ki=args.integral, setpoint=args.niveau)
-    # TODOO: find sample time
     # pid.sample_time = 0.0005
     # pid.output_limits = (args.min, args.max)
 
@@ -64,10 +69,13 @@ def debugMode(args):
     try:
         while True:
             currentVal = getCurrentVal(args=args, debugFile=debugFile)
-            correctVal = pid(currentVal)
+            correctVal = float(pid(currentVal))
             f = open(debugFile, 'w')
             f.write(str(correctVal))
             f.close()
+
+            if args.verbose >= 2:
+                print(f'time: {time()-startTime}, corrected Value: {currentVal}, current Value: {currentVal}')
 
             if args.log == True:
                 logFile = Path(args.log_file)
@@ -77,12 +85,10 @@ def debugMode(args):
             
             
             # plotting
+            # TODOOOOO: plots wrong values
             if args.visulize == True:
 
                 plt.title('correct: ' + str(correctVal))
-
-                if args.verbose >= 2:
-                    print(f'time: {time()-startTime}, corrected Value: {currentVal}, current Value: {currentVal}')
 
                 x.append(time() - startTime)
                 y1.append(correctVal)
@@ -106,6 +112,7 @@ def debugMode(args):
     except KeyboardInterrupt:
         print('\nKeyboard interrupt detected\nExiting...')
         #TODO: necessary cleanup?
+        # print(x,y1,y2)
         exit()
 
 
