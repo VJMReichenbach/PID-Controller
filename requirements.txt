@@ -1,3 +1,4 @@
-perlin_noise>=1.12
-pyepics>=3.5.1
-simple_pid>=1.0.1
+matplotlib~=3.5.3
+numpy~=1.23.2
+pyepics~=3.5.1
+simple_pid~=1.0.1
