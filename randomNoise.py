@@ -5,7 +5,7 @@ from pathlib import Path
 from time import sleep
 import numpy as np
 
-ver = "0.0.1"
+ver = "1.0.0"
 author = "Valentin Reichenbach"
 description = f"""
 TODO: Insert description
