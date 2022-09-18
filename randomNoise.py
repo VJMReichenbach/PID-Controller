@@ -7,7 +7,7 @@ from time import sleep
 import numpy as np
 from epics import caput
 
-ver = "1.1.0"
+ver = "1.2.0"
 author = "Valentin Reichenbach"
 description = f"""
 This program is used to generate noise for a PV in an epics system.
@@ -29,6 +29,20 @@ def writeToDebugFile(debugFile: Path, content, args):
         print(f'Written {content} to {debugFile}')
     f.close()
 
+def getFromDebugFile(debugFile: Path, lastVal: float, args) -> float:
+    f = open(debugFile, 'r')
+    content = f.read()
+    f.close()
+
+    try:
+        float(content)
+    except Exception as e:
+        if args.verbose >= 1:
+            print(f'Error while reading {debugFile}!\n{e}')
+        content = lastVal
+
+    return content
+
 def generateNoise(args, noiseStrength: float=0.5) -> float:
     # TODO: add other noise types (like sin)
 
@@ -44,18 +58,31 @@ def debugMode(args):
     except:
         pass
 
+    print('Starting...')
+
     # create the debug file
     debugFile = Path(args.file)
     writeToDebugFile(debugFile=debugFile, content=1, args=args)
-    lastVal = 1
 
-    print('Starting...')
+    # set the last value to the niveau
+    lastVal:float = 1.0
+
     try:
         while True:
             # Writes a random value to the debugfile
-            r = lastVal + generateNoise(args=args)
+            fileVal = getFromDebugFile(debugFile=debugFile, lastVal=lastVal, args=args)
+            noise = generateNoise(args=args)
+
+            # conversion to float because python threw an error otherwise
+            r = float(fileVal) + float(noise)
+
+            # write the new value to the debug file
             writeToDebugFile(debugFile=debugFile, content=r, args=args)
+
+            # update the last value
             lastVal = r
+
+            # wait for the next iteration
             sleep(args.delay)
     except KeyboardInterrupt:
         print('\nKeyboard interrupt detected\nExiting...')

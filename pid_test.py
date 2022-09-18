@@ -7,7 +7,7 @@ from pathlib import Path
 from time import sleep, time
 import matplotlib.pyplot as plt
 
-ver = "0.1.2"
+ver = "1.0.0"
 author = "Valentin Reichenbach"
 description = f"""
 TODO: Insert description
@@ -64,18 +64,22 @@ def debugMode(args):
 
     startTime = time()
 
-    graphLen = 40
+    graphLen = 80
 
     try:
         while True:
             currentVal = getCurrentVal(args=args, debugFile=debugFile)
+
+            # get new value
             correctVal = float(pid(currentVal))
+
+            # wrtie new value to debug file
             f = open(debugFile, 'w')
             f.write(str(correctVal))
             f.close()
 
             if args.verbose >= 2:
-                print(f'time: {time()-startTime}, corrected Value: {currentVal}, current Value: {currentVal}')
+                print(f'time: {time()-startTime}, corrected Value: {correctVal}, current Value: {currentVal}')
 
             if args.log == True:
                 logFile = Path(args.log_file)
@@ -85,10 +89,7 @@ def debugMode(args):
             
             
             # plotting
-            # TODOOOOO: plots wrong values
             if args.visualize == True:
-
-                plt.title('correct: ' + str(correctVal))
 
                 x.append(time() - startTime)
                 y1.append(correctVal)
@@ -104,15 +105,18 @@ def debugMode(args):
 
                 plt.cla() # clear axes
 
+                plt.title('correct: ' + str(correctVal))
                 plt.plot(x, y1, label='Value')
-                plt.plot(x, y2, label='niveau')
+                plt.plot(x, y2, label='Niveau')
                 plt.legend(loc='upper left')
 
                 plt.pause(0.1)
     except KeyboardInterrupt:
         print('\nKeyboard interrupt detected\nExiting...')
         #TODO: necessary cleanup?
-        # print(x,y1,y2)
+        print('x: ' + str(x) + '\n\n')
+        print('y1: ' + str(y1) + '\n\n')
+        print('y2: ' + str(y2) + '\n\n')
         exit()
 
 
