@@ -86,7 +86,7 @@ def debugMode(args):
             
             # plotting
             # TODOOOOO: plots wrong values
-            if args.visulize == True:
+            if args.visualize == True:
 
                 plt.title('correct: ' + str(correctVal))
 
@@ -141,7 +141,7 @@ def main():
     parentParser = argparse.ArgumentParser('The Parrent parser', add_help=False)
     
     # general options
-    parentParser.add_argument('--visulize', action='store_true', default=False, help='visulize the changed values live')
+    parentParser.add_argument('--visualize', action='store_true', default=False, help='visualize the changed values live')
     parentParser.add_argument('--version', action='version', version=ver)
     parentParser.add_argument('-v', '--verbose', action='count', default=0, help='verbose output')
 
