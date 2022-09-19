@@ -7,7 +7,7 @@ from time import sleep
 import numpy as np
 from epics import caput
 
-ver = "1.2.0"
+ver = "1.3.0"
 author = "Valentin Reichenbach"
 description = f"""
 This program is used to generate noise for a PV in an epics system.
