@@ -151,7 +151,7 @@ def main():
 
     # PID controller options
     pidControllerOptions = parentParser.add_argument_group('PID-Controller options')
-    pidControllerOptions.add_argument('-p', '--proportional', type=float, default=0.7,
+    pidControllerOptions.add_argument('-p', '--proportional', type=float, default=0.5,
                         help='specifys the coefficient for the proportional term')
     pidControllerOptions.add_argument('-i', '--integral', type=float, default=0.3,
                         help='specifys the coefficient for the integral term')

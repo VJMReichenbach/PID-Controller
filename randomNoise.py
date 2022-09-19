@@ -7,7 +7,7 @@ from time import sleep
 import numpy as np
 from epics import caput
 
-ver = "1.3.0"
+ver = "1.4.0"
 author = "Valentin Reichenbach"
 description = f"""
 This program is used to generate noise for a PV in an epics system.
@@ -47,7 +47,7 @@ def generateNoise(args) -> float:
     # TODO: add other noise types (like sin)
 
     # draws a random value from normal (Gaussian) distribution bewteen -1 and 1
-    noise = args.noise_strength * np.random.normal(0,1,1)[0]
+    noise = args.noise_strength * np.random.normal(0,1,1)[0] + args.drift
     return noise 
 
 
@@ -126,6 +126,7 @@ def main():
     parentParser.add_argument('-v', '--verbose', action='count', default=0, help='verbose output')
     parentParser.add_argument('--version', action='version', version=ver)
     parentParser.add_argument('--noise-strength', type=float, default=0.5, help='the strength of the noise. The default value is 0.5')
+    parentParser.add_argument('--drift', type=float, default=0.0, help='the drift of the noise. The default value is 0.0')
 
     # subcommands
     subparsers = parser.add_subparsers(dest='mode', help='the program can use an epics interface or create a debug enviroment for another script')
