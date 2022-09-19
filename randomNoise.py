@@ -43,11 +43,11 @@ def getFromDebugFile(debugFile: Path, lastVal: float, args) -> float:
 
     return content
 
-def generateNoise(args, noiseStrength: float=0.5) -> float:
+def generateNoise(args) -> float:
     # TODO: add other noise types (like sin)
 
     # draws a random value from normal (Gaussian) distribution bewteen -1 and 1
-    noise = noiseStrength * np.random.normal(0,1,1)[0]
+    noise = args.noise_strength * np.random.normal(0,1,1)[0]
     return noise 
 
 
@@ -125,6 +125,7 @@ def main():
     parentParser.add_argument('-d','--delay', type=float, default=0.05, help='delay between each write in miliseconds. The default value is 0.05')
     parentParser.add_argument('-v', '--verbose', action='count', default=0, help='verbose output')
     parentParser.add_argument('--version', action='version', version=ver)
+    parentParser.add_argument('--noise-strength', type=float, default=0.5, help='the strength of the noise. The default value is 0.5')
 
     # subcommands
     subparsers = parser.add_subparsers(dest='mode', help='the program can use an epics interface or create a debug enviroment for another script')
