@@ -51,7 +51,7 @@ def getCurrentVal(args, debugFile: Path=Path('debugEnv.txt')) -> float:
 def debugMode(args):
     debugFile = Path('./' + args.file)
     getCurrentVal(args=args, debugFile=debugFile)
-    # TODOOOO: find sample time and parameters
+    # TODOO: find sample time and parameters
     pid = PID(Kp=args.proportional, Kd=args.derivative, Ki=args.integral, setpoint=args.niveau)
     # pid.sample_time = 0.0005
     # pid.output_limits = (args.min, args.max)
@@ -114,9 +114,6 @@ def debugMode(args):
     except KeyboardInterrupt:
         print('\nKeyboard interrupt detected\nExiting...')
         #TODO: necessary cleanup?
-        print('x: ' + str(x) + '\n\n')
-        print('y1: ' + str(y1) + '\n\n')
-        print('y2: ' + str(y2) + '\n\n')
         exit()
 
 
@@ -132,7 +129,7 @@ def normalMode(args):
         print(f'PV: {args.pv} could not connect\nExiting...')
         exit()
 
-
+    # TODOOOOOO: umrechnung von pos zu strom
     # TODOOO: Epics interface
     print('EPICS interface not yet implemented')
     exit()
