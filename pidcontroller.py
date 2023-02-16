@@ -7,7 +7,7 @@ from pathlib import Path
 from time import sleep, time
 import matplotlib.pyplot as plt
 
-ver = "1.0.0"
+ver = "1.1.0"
 author = "Valentin Reichenbach"
 description = f"""
 TODO: Insert description
@@ -50,6 +50,7 @@ def getCurrentVal(args, debugFile: Path=Path('debugEnv.txt')) -> float:
 
 def debugMode(args):
     debugFile = Path('./' + args.file)
+    args.pv = 'debug'
     getCurrentVal(args=args, debugFile=debugFile)
     # TODOO: find sample time and parameters
     pid = PID(Kp=args.proportional, Kd=args.derivative, Ki=args.integral, setpoint=args.niveau)
@@ -65,6 +66,15 @@ def debugMode(args):
     startTime = time()
 
     graphLen = 80
+
+    # log options
+    if args.log == True:
+        logFile = Path(args.log_file)
+        header = f'PID-Controller Log File\nPV: {args.pv}\nKp: {args.proportional}\nKi: {args.integral}\nKd: {args.derivative}\nNiveau: {args.niveau}\nDelay: {args.delay}\n\n'
+        with open(logFile, 'w') as l:
+            l.write(header)
+            l.write('time, corrected Value, current Value\n')
+            l.close()
 
     try:
         while True:
@@ -84,7 +94,7 @@ def debugMode(args):
             if args.log == True:
                 logFile = Path(args.log_file)
                 l = open(logFile, 'a')
-                l.write(f'Time: {time()} | corrected Value: {correctVal}\n')
+                l.write(f'{time()-startTime}, {correctVal}, {currentVal}\n')
                 l.close()
             
             
@@ -111,6 +121,8 @@ def debugMode(args):
                 plt.legend(loc='upper left')
 
                 plt.pause(0.1)
+
+            sleep(args.delay)
     except KeyboardInterrupt:
         print('\nKeyboard interrupt detected\nExiting...')
         #TODO: necessary cleanup?
@@ -145,6 +157,8 @@ def main():
     parentParser.add_argument('--visualize', action='store_true', default=False, help='visualize the changed values live')
     parentParser.add_argument('--version', action='version', version=ver)
     parentParser.add_argument('-v', '--verbose', action='count', default=0, help='verbose output')
+    parentParser.add_argument('--force', action='store_true', default=False,
+                              help='forces all checks like the pv connect chec to pass. Additionally every file used (like "log.txt") will be overwritten This is should only be used for development and testing purposes')
 
     # PID controller options
     pidControllerOptions = parentParser.add_argument_group('PID-Controller options')
@@ -160,11 +174,12 @@ def main():
                         help='specifys the minimum value for the PID controller')
     pidControllerOptions.add_argument('--max', type=float, default=3,
                         help='specifys the maximum value for the PID controller')
+    pidControllerOptions.add_argument('-D', '--delay', type=float, default=0.0, help='specifys the delay between the PID controller reading the current value and outputting the new value. This is 0 by default')
     
     # logging
     loggingOptions = parentParser.add_argument_group('logging options')
     loggingOptions.add_argument('--log', action='store_true', default=False, help='the program will log the used values if this flag is used. the default file is "log.txt"')
-    loggingOptions.add_argument('--log-file', type=str, default='log.txt', help='the file used for logging')
+    loggingOptions.add_argument('--log-file', type=Path, default=Path('log.txt'), help='the file used for logging')
     
     # Subcommands
     subparsers = parser.add_subparsers(dest='mode', help='the program can use an epics interface or a debug enviroment controlled by another script')
@@ -173,8 +188,6 @@ def main():
     # normal mode
     pvParser = subparsers.add_parser('normal', help='uses the epics interface', parents=[parentParser])
     pvParser.add_argument('--pv', type=str, default='I1SV02' ,help='the process variable that should be controlled. The default is I1SV02')
-    pvParser.add_argument('--force', action='store_true', default=False,
-                        help='forces the pv connect check to pass. This is should only be used for development and testing purposes')
     
     # debug mode
     debugParser = subparsers.add_parser('debug', help='uses a test enviroment instead of the epics interface', parents=[parentParser])
@@ -183,11 +196,15 @@ def main():
     args = parser.parse_args()
 
     if args.log == True:
-        try:
-            remove(Path(args.log_file))
-        except:
-            pass
-
+        if args.log_file.exists():
+            if args.force:
+                print(f'Log file: {args.log_file} already exists\nOverwriting...')
+                remove(args.log_file)
+            else:
+                print(f'Log file: {args.log_file} already exists')
+                print('Use the --force flag to overwrite the file')
+                print('Exiting...')
+                exit()
 
     if args.mode == 'debug':
         debugMode(args)
