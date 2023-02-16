@@ -43,7 +43,7 @@ def getFromDebugFile(debugFile: Path, lastVal: float, args) -> float:
     return content
 
 def generateNoise(args) -> float:
-    # TODO: add other noise types (like sin)
+    # TODO: add other noise types (like sin and (sin+normal)/2)
 
     # draws a random value from normal (Gaussian) distribution bewteen -1 and 1
     noise = args.noise_strength * np.random.normal(0,1,1)[0] + args.drift
