@@ -10,7 +10,7 @@ sudo apt install python3-gi-cairo
 
 ## Todo
 
-- Störsignal überarbeiten
-- Regler verbessern
-- regler an einer stelle tSleep einfügen (flag)
-- logging neu machen (csv?) (einstellung des systems in den csv header (p, i, d, tSleep, ...)):w
+- [x] Störsignal überarbeiten
+- [x] Regler verbessern
+- [x] regler an einer stelle tSleep einfügen (flag)
+- [x] logging neu machen (csv?) (einstellung des systems in den csv header (p, i, d, tSleep, ...)):w

@@ -42,11 +42,20 @@ def getFromDebugFile(debugFile: Path, lastVal: float, args) -> float:
 
     return content
 
-def generateNoise(args) -> float:
+def generateNoise(noise_type: str, noise_strength: float, drift: float) -> float:
     # TODO: add other noise types (like sin and (sin+normal)/2)
-
-    # draws a random value from normal (Gaussian) distribution bewteen -1 and 1
-    noise = args.noise_strength * np.random.normal(0,1,1)[0] + args.drift
+    if noise_type == 'normal':
+        # draws a random value from normal (Gaussian) distribution bewteen -1 and 1
+        noise = noise_strength * np.random.normal(0,1,1)[0] + drift
+    elif noise_type == 'sin':
+        # draws a random value from a sine wave bewteen -1 and 1
+        noise = noise_strength * np.sin(np.random.uniform(0, 2*np.pi, 1)[0]) + drift
+    elif noise_type == 'mix':
+        # draws a random value from a mixture of a normal distribution and a sine wave bewteen -1 and 1
+        noise = (generateNoise(noise_type='normal', noise_strength=noise_strength, drift=drift) + generateNoise(noise_type='sin', noise_strength=noise_strength, drift=drift)) / 2
+    else:
+        print(f'Error: noise type {noise_type} not recognized')
+        exit()
     return noise 
 
 
@@ -70,7 +79,7 @@ def debugMode(args):
         while True:
             # Writes a random value to the debugfile
             fileVal = getFromDebugFile(debugFile=debugFile, lastVal=lastVal, args=args)
-            noise = generateNoise(args=args)
+            noise = generateNoise(noise_type=args.noise_type, noise_strength=args.noise_strength, drift=args.drift)
 
             # conversion to float because python threw an error otherwise
             r = float(fileVal) + float(noise)
@@ -126,6 +135,7 @@ def main():
     parentParser.add_argument('--version', action='version', version=ver)
     parentParser.add_argument('--noise-strength', type=float, default=0.5, help='the strength of the noise. The default value is 0.5')
     parentParser.add_argument('--drift', type=float, default=0.0, help='the drift of the noise. The default value is 0.0')
+    parentParser.add_argument('--noise-type', type=str, default='normal', help='the type of noise that should be generated. The default value is "normal" (a normal distribution). Alternativly, you can use "sin" for noise a sine wave like noise, or "mix for a bixture of both"')
 
     # subcommands
     subparsers = parser.add_subparsers(dest='mode', help='the program can use an epics interface or create a debug enviroment for another script')
