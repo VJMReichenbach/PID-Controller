@@ -1,4 +1,13 @@
-matplotlib>=3.5.3
-numpy>=1.23.2
-pyepics>=3.5.1
-simple_pid>=1.0.1
+contourpy
+cycler
+fonttools
+kiwisolver
+matplotlib
+numpy
+packaging
+Pillow
+pyepics
+pyparsing
+python-dateutil
+simple-pid
+six
