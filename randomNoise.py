@@ -42,13 +42,15 @@ def getFromDebugFile(debugFile: Path, lastVal: float, args) -> float:
 
     return content
 
-def generateNoise(noise_type: str, noise_strength: float, drift: float) -> float:
+def generateNoise(noise_type: str, noise_strength: float, drift: float, frequency: float=0.0) -> float:
     # TODO: add other noise types (like sin and (sin+normal)/2)
     if noise_type == 'normal':
         # draws a random value from normal (Gaussian) distribution bewteen -1 and 1
         noise = noise_strength * np.random.normal(0,1,1)[0] + drift
     elif noise_type == 'sin':
         # draws a random value from a sine wave bewteen -1 and 1
+        # TODOOO: give frequency as an argument and use it to calculate the noise
+        # TODOOO: random is always sine wave 
         noise = noise_strength * np.sin(np.random.uniform(0, 2*np.pi, 1)[0]) + drift
     elif noise_type == 'mix':
         # draws a random value from a mixture of a normal distribution and a sine wave bewteen -1 and 1
