@@ -132,3 +132,4 @@ dmypy.json
 # script specific ignores
 debugEnv.txt
 log.txt
+sin.txt 
