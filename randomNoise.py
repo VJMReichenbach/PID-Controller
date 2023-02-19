@@ -190,7 +190,7 @@ def main():
     args = parser.parse_args()
 
     # start sine noise script with the given arguments if asked for
-    if args.noise_type == 'sin':
+    if args.noise_type == 'sin' or args.noise_type == 'mix':
         cmd = ['python3', 'sinenoise.py', "--force"]
         sleep(1)
         if args.frequency:
