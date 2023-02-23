@@ -44,7 +44,7 @@ def getCurrentVal(args, debugFile: Path=Path('debugEnv.txt')) -> float:
         return val
     elif args.mode == 'normal':
         # TODO: check pv name
-        return epics.caget(f'{args.pv}:outCur')
+        return epics.caget(args.pv + ':outCur')
     else:
         print('Something went wrong while parsing the arguments\nExiting...')
         exit()
@@ -201,10 +201,10 @@ def main():
     if args.log == True:
         if args.log_file.exists():
             if args.force:
-                print('Log file: ' + args.log_file + ' already exists\nOverwriting...')
+                print('Log file: ' + str(args.log_file) + ' already exists\nOverwriting...')
                 remove(args.log_file)
             else:
-                print('Log file: ' + args.log_file + ' already exists')
+                print('Log file: ' + str(args.log_file) + ' already exists')
                 print('Use the --force flag to overwrite the file')
                 print('Exiting...')
                 exit()

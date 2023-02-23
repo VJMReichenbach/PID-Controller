@@ -86,7 +86,7 @@ def debugMode(args):
     writeToDebugFile(debugFile=debugFile, content=1, args=args)
 
     # set the last value to the niveau
-    lastVal:float = 1.0
+    lastVal= 1.0
 
     try:
         while True:
@@ -143,7 +143,7 @@ def cleanup(no_delete: bool, file: str, noise_type: str):
         try:
             remove(file)
         except Exception as e:
-            print('Something went wrong while deleting ' + file + '!')
+            print('Something went wrong while deleting ' + str(file) + '!')
             print(e)
     if noise_type == 'sin':
         try:
@@ -199,8 +199,6 @@ def main():
         cmd = ['python3', 'sinenoise.py', "--force"]
         sleep(1)
         if args.frequency:
-            cmd.append('--frequency')
-            cmd.append(str(args.frequency))
         if args.verbose > 0:
             print('Starting sine noise script with cmd:')
             cmd_str = ''

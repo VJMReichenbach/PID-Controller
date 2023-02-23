@@ -31,12 +31,12 @@ if __name__ == "__main__":
     
     if args.output.exists():
         if args.force:
-            print("Overwriting " + args.output + "")
+            print("Overwriting " + str(args.output) + "")
         else:
-            print("File " + args.output + " already exists. Use -F to force overwrite")
+            print("File " + str(args.output) + " already exists. Use -F to force overwrite")
             exit(1)
     else:
-        print("Writing to " + args.output + "")
+        print("Writing to " + str(args.output) + "")
 
     try:
         while True:
