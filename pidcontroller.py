@@ -91,7 +91,7 @@ def debugMode(args):
             f.close()
 
             if args.verbose >= 2:
-                print('time: ' + str(time()-startTime) + ', corrected Value: ' + correctVal + ', current Value: ' + currentVal + '')
+                print('time: ' + str(time()-startTime) + ', corrected Value: ' + str(correctVal) + ', current Value: ' + str(currentVal) + '')
 
             if args.log == True:
                 logFile = args.log_file
