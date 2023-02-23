@@ -98,7 +98,7 @@ def debugMode(args):
         while True:
             # Writes a random value to the debugfile
             fileVal = getFromDebugFile(debugFile=debugFile, lastVal=lastVal, args=args)
-            noise = generateNoise(no_delete=args.no_delete, file=args.file, noise_type=args.noise_type, noise_strength=args.noise_strength, drift=args.drift, frequency=args.frequency, file_val=fileVal)
+            noise = generateNoise(no_delete=args.no_delete, file=args.file, noise_type=args.noise_type, noise_strength=args.noise_strength, drift=args.drift, frequency=args.frequency, fileVal=fileVal)
 
             # if the noise gets read incorrectly, use the last value
             if noise == '':
