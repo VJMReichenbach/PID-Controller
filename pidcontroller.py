@@ -72,7 +72,7 @@ def debugMode(args):
     # log options
     if args.log == True:
         logFile = args.log_file
-        header = 'PID-Controller Log File\nPV: ' + args.pv + '\nKp: ' + args.proportional + '\nKi: ' + args.integral + '\nKd: ' + args.derivative + '\nNiveau: ' + args.niveau + '\nDelay: ' + args.delay + '\n\n'
+        header = 'PID-Controller Log File\nPV: ' + str(args.pv) + '\nKp: ' + str(args.proportional) + '\nKi: ' + str(args.integral) + '\nKd: ' + str(args.derivative) + '\nNiveau: ' + str(args.niveau) + '\nDelay: ' + str(args.delay) + '\n\n'
         with open(logFile, 'w') as l:
             l.write(header)
             l.write('time, corrected Value, current Value\n')
