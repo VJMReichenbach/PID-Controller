@@ -76,8 +76,7 @@ def generateNoise(i, y, count, no_delete: bool, file: str, noise_type: str, nois
         # by calling the normal and sin functions
         normal_noise , _ = generateNoise(i, y, count, no_delete=no_delete, file=file, noise_type='normal', noise_strength=noise_strength, drift=drift, period=period, fileVal=fileVal, verbose=verbose)
         sin_noise , i = generateNoise(i, y, count, no_delete=no_delete, file=file, noise_type='sin', noise_strength=noise_strength, drift=drift, period=period, fileVal=fileVal, verbose=verbose)
-        noise = (normal_noise + sin_noise) / 2
-        noise = noise 
+        noise = normal_noise + sin_noise
     else:
         print('Error: noise type ' + noise_type + ' not recognized')
         return 0
