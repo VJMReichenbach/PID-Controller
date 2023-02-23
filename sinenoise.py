@@ -38,6 +38,9 @@ if __name__ == "__main__":
     else:
         print("Writing to " + str(args.output) + "")
 
+
+    # convert to string for python 3.5
+    args.output = str(args.output)
     try:
         while True:
             # Generate sine wave

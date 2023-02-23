@@ -18,7 +18,7 @@ Version: 1.1.0
 License: GPLv3+
 """    
 
-def getCurrentVal(args, debugFile: Path=Path('debugEnv.txt')) -> float:
+def getCurrentVal(args, debugFile: str) -> float:
     if args.mode == 'debug':
         # Check if the debug file exists
         try:
@@ -51,7 +51,7 @@ def getCurrentVal(args, debugFile: Path=Path('debugEnv.txt')) -> float:
 
 
 def debugMode(args):
-    debugFile = Path('./' + args.file)
+    debugFile = args.file
     args.pv = 'debug'
     getCurrentVal(args=args, debugFile=debugFile)
     # TODOO: find sample time and parameters
@@ -71,7 +71,7 @@ def debugMode(args):
 
     # log options
     if args.log == True:
-        logFile = Path(args.log_file)
+        logFile = args.log_file
         header = 'PID-Controller Log File\nPV: ' + args.pv + '\nKp: ' + args.proportional + '\nKi: ' + args.integral + '\nKd: ' + args.derivative + '\nNiveau: ' + args.niveau + '\nDelay: ' + args.delay + '\n\n'
         with open(logFile, 'w') as l:
             l.write(header)
@@ -94,7 +94,7 @@ def debugMode(args):
                 print('time: ' + str(time()-startTime) + ', corrected Value: ' + correctVal + ', current Value: ' + currentVal + '')
 
             if args.log == True:
-                logFile = Path(args.log_file)
+                logFile = args.log_file
                 l = open(logFile, 'a')
                 l.write(str(time() - startTime) + ', ' + str(correctVal) + ', ' + str(currentVal) + '\n')
                 l.close()
@@ -197,6 +197,9 @@ def main():
     debugParser.add_argument('-f', '--file', type=str, default='debugEnv.txt', help='the text file used for simulating the debug enviroment. The default name is "debugEnv.txt"')
     
     args = parser.parse_args()
+
+    args.log_file = str(args.log_file)
+    args.file = str(args.file)
 
     if args.log == True:
         if args.log_file.exists():

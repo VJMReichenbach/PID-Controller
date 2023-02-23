@@ -20,7 +20,7 @@ Version: 1.4.0
 License: GPLv3+
 """
 
-def writeToDebugFile(debugFile: Path, content, args):
+def writeToDebugFile(debugFile: str, content, args):
     content = str(content)
 
     f = open(debugFile, 'w')
@@ -29,7 +29,7 @@ def writeToDebugFile(debugFile: Path, content, args):
         print('Written '+ content + ' to ' + str(debugFile) + '')
     f.close()
 
-def getFromDebugFile(debugFile: Path, lastVal: float, args) -> float:
+def getFromDebugFile(debugFile: str, lastVal: float, args) -> float:
     f = open(debugFile, 'r')
     content = f.read()
     f.close()
@@ -193,6 +193,8 @@ def main():
 
 
     args = parser.parse_args()
+
+    args.file = str(args.file)
 
     # start sine noise script with the given arguments if asked for
     if args.noise_type == 'sin' or args.noise_type == 'mix':
