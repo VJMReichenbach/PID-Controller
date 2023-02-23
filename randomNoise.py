@@ -26,7 +26,7 @@ def writeToDebugFile(debugFile: Path, content, args):
     f = open(debugFile, 'w')
     f.write(content)
     if args.verbose >= 1:
-        print('Written '+ content + ' to ' + debugFile + '')
+        print('Written '+ content + ' to ' + str(debugFile) + '')
     f.close()
 
 def getFromDebugFile(debugFile: Path, lastVal: float, args) -> float:
@@ -38,7 +38,7 @@ def getFromDebugFile(debugFile: Path, lastVal: float, args) -> float:
         float(content)
     except Exception as e:
         if args.verbose >= 1:
-            print('Error while reading ' + debugFile + '!')
+            print('Error while reading ' + str(debugFile) + '!')
             print('Exception: ', e)
         content = lastVal
 
@@ -199,6 +199,8 @@ def main():
         cmd = ['python3', 'sinenoise.py', "--force"]
         sleep(1)
         if args.frequency:
+            cmd.append('--frequency')
+            cmd.append(str(args.frequency))
         if args.verbose > 0:
             print('Starting sine noise script with cmd:')
             cmd_str = ''

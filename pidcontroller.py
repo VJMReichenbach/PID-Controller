@@ -26,7 +26,7 @@ def getCurrentVal(args, debugFile: Path=Path('debugEnv.txt')) -> float:
             val = f.read()
             f.close()
         except Exception as e:
-            print('The debug file ' + debugFile + ' was not found')
+            print('The debug file ' + str(debugFile) + ' was not found')
             print('Exception: ', e)
             print('Exiting...')
             exit()
@@ -36,7 +36,7 @@ def getCurrentVal(args, debugFile: Path=Path('debugEnv.txt')) -> float:
             val = float(val)
         except Exception as e:
             if args.verbose >= 1:
-                print('couldn\'t convert val: "' + val + '" to float. Returned 0 instead')
+                print('couldn\'t convert val: "' + str(val) + '" to float. Returned 0 instead')
             if args.verbose >= 2:
                 print('Exception: ', e)
             val = 0
@@ -91,7 +91,7 @@ def debugMode(args):
             f.close()
 
             if args.verbose >= 2:
-                print('time: ' + time()-startTime + ', corrected Value: ' + correctVal + ', current Value: ' + currentVal + '')
+                print('time: ' + str(time()-startTime) + ', corrected Value: ' + correctVal + ', current Value: ' + currentVal + '')
 
             if args.log == True:
                 logFile = Path(args.log_file)
