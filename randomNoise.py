@@ -138,8 +138,8 @@ def normalMode(args):
         print('\nKeyboard interrupt detected\nExiting...')
         return
 
-def cleanup(no_delete: bool, file: str, noise_type: str):
-    if no_delete == False:
+def cleanup(no_delete: bool, file: str, noise_type: str, mode: str):
+    if no_delete == False and mode == 'debug':
         try:
             remove(file)
         except Exception as e:
@@ -215,11 +215,15 @@ def main():
         debugMode(args)
     elif args.mode == 'normal':
         normalMode(args)
+        # set debug mode rélated variables to default values
+        # script crashes otherwise
+        args.no_delete = False
+        args.file = 'debugEnv.txt'
     else:
         print('Something went wrong while parsing the arguments\nExiting...')
 
     # cleanup
-    cleanup(no_delete=args.no_delete, file=args.file, noise_type=args.noise_type)
+    cleanup(no_delete=args.no_delete, file=args.file, noise_type=args.noise_type, mode=args.mode)
 
     
 if __name__ == '__main__':
