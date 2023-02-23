@@ -6,12 +6,12 @@ from time import sleep
 
 ver = "1.0.0"
 author = "Valentin Reichenbach"
-description = f"""
+description = """
 Generates a sine wave and writes it to a file.
 """
-epilog = f"""
-Author: {author}
-Version: {ver}
+epilog = """
+Author: Valentin Reichenbach
+Version: 1.0.0
 License: GPLv3+
 """    
 
@@ -31,12 +31,12 @@ if __name__ == "__main__":
     
     if args.output.exists():
         if args.force:
-            print(f"Overwriting {args.output}")
+            print("Overwriting " + args.output + "")
         else:
-            print(f"File {args.output} already exists. Use -F to force overwrite")
+            print("File " + args.output + " already exists. Use -F to force overwrite")
             exit(1)
     else:
-        print(f"Writing to {args.output}")
+        print("Writing to " + args.output + "")
 
     try:
         while True:
@@ -45,13 +45,13 @@ if __name__ == "__main__":
             x = (x + args.frequency / 2*np.pi) % 2 * np.pi
 
             if args.verbose > 0:
-                print(f"Frequency: {args.frequency}Hz, x: {x}, y: {y}")
+                print("Frequency: " + args.frequency + "Hz, x: " + x + ", y: " + y + "")
 
             sleep(1/args.frequency)
 
             # Write to file
             with open(args.output, "w") as f:
-                f.write(f"{y}")
+                f.write(str(y))
 
     except KeyboardInterrupt:
         print("\n Keyboard interrupt")

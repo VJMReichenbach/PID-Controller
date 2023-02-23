@@ -9,14 +9,14 @@ import subprocess
 
 ver = "1.4.0"
 author = "Valentin Reichenbach"
-description = f"""
+description = """
 This program is used to generate noise for a PV in an epics system.
 In normal mode it will apply the noise to a given PV.
 In debug mode it will continuously write to a given text file to simulate a debug enviroment.
 """
-epilog = f"""
-Author: {author}
-Version: {ver}
+epilog = """
+Author: Valentin Reichenbach
+Version: 1.4.0
 License: GPLv3+
 """
 
@@ -26,7 +26,7 @@ def writeToDebugFile(debugFile: Path, content, args):
     f = open(debugFile, 'w')
     f.write(content)
     if args.verbose >= 1:
-        print(f'Written {content} to {debugFile}')
+        print('Written '+ content + ' to ' + debugFile + '')
     f.close()
 
 def getFromDebugFile(debugFile: Path, lastVal: float, args) -> float:
@@ -38,7 +38,8 @@ def getFromDebugFile(debugFile: Path, lastVal: float, args) -> float:
         float(content)
     except Exception as e:
         if args.verbose >= 1:
-            print(f'Error while reading {debugFile}!\n{e}')
+            print('Error while reading ' + debugFile + '!')
+            print('Exception: ', e)
         content = lastVal
 
     return content
@@ -67,7 +68,7 @@ def generateNoise(no_delete: bool, file: str, noise_type: str, noise_strength: f
         sin_noise = generateNoise(no_delete=no_delete, file=file, noise_type='sin', noise_strength=noise_strength, drift=drift, frequency=frequency)
         noise = (normal_noise + sin_noise) / 2
     else:
-        print(f'Error: noise type {noise_type} not recognized')
+        print('Error: noise type ' + noise_type + ' not recognized')
         return 0
     return noise 
 
@@ -96,12 +97,13 @@ def debugMode(args):
             # if the noise gets read incorrectly, use the last value
             if noise == '':
                 if args.verbose >= 2:
-                    print(f'Error while reading noise. Using 0')
+                    print('Error while reading noise. Using 0')
                 noise = 0
 
             # conversion to float because python threw an error otherwise
             if args.verbose >= 3:
-                print(f'fileVal: {fileVal}, noise: {noise}')
+                print('fileVal: ' + str(fileVal))
+                print('noise: ' + str(noise))
             r = float(fileVal) + float(noise)
 
             # write the new value to the debug file
@@ -141,19 +143,22 @@ def cleanup(no_delete: bool, file: str, noise_type: str):
         try:
             remove(file)
         except Exception as e:
-            print(f'Something went wrong while deleting {file}!\n{e}')
+            print('Something went wrong while deleting ' + file + '!')
+            print(e)
     if noise_type == 'sin':
         try:
             # kill subprocess
             subprocess.run(['pkill', '-f', 'sinenoise.py'])
         except Exception as e:
-            print(f'Something went wrong while killing the sinenoise subprocess!\n{e}')
+            print('Something went wrong while killing the sinenoise subprocess!')
+            print(e)
 
         try:
             # delete sin.txt
             remove('sin.txt')
         except Exception as e:
-            print(f'Something went wrong while deleting sin.txt!\n{e}')
+            print('Something went wrong while deleting sin.txt!')
+            print(e)
 
 
 def main():
@@ -194,7 +199,8 @@ def main():
         cmd = ['python3', 'sinenoise.py', "--force"]
         sleep(1)
         if args.frequency:
-            cmd.append(f'--frequency={args.frequency}')
+            cmd.append('--frequency')
+            cmd.append(str(args.frequency))
         if args.verbose > 0:
             print('Starting sine noise script with cmd:')
             cmd_str = ''

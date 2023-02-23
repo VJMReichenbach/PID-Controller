@@ -9,12 +9,12 @@ import matplotlib.pyplot as plt
 
 ver = "1.1.0"
 author = "Valentin Reichenbach"
-description = f"""
+description = """
 TODO: Insert description
 """
-epilog = f"""
-Author: {author}
-Version: {ver}
+epilog = """
+Author: Valentin Reichenbach
+Version: 1.1.0
 License: GPLv3+
 """    
 
@@ -26,7 +26,9 @@ def getCurrentVal(args, debugFile: Path=Path('debugEnv.txt')) -> float:
             val = f.read()
             f.close()
         except Exception as e:
-            print(f'The debug file {debugFile} was not found!\n{e}\nExiting...')
+            print('The debug file ' + debugFile + ' was not found')
+            print('Exception: ', e)
+            print('Exiting...')
             exit()
         
         # BUG: sometimes nothing is read when not in v mode
@@ -34,7 +36,7 @@ def getCurrentVal(args, debugFile: Path=Path('debugEnv.txt')) -> float:
             val = float(val)
         except Exception as e:
             if args.verbose >= 1:
-                print(f'couldn\'t convert val: "{val}" to float. Returned 0 instead')
+                print('couldn\'t convert val: "' + val + '" to float. Returned 0 instead')
             if args.verbose >= 2:
                 print('Exception: ', e)
             val = 0
@@ -70,7 +72,7 @@ def debugMode(args):
     # log options
     if args.log == True:
         logFile = Path(args.log_file)
-        header = f'PID-Controller Log File\nPV: {args.pv}\nKp: {args.proportional}\nKi: {args.integral}\nKd: {args.derivative}\nNiveau: {args.niveau}\nDelay: {args.delay}\n\n'
+        header = 'PID-Controller Log File\nPV: ' + args.pv + '\nKp: ' + args.proportional + '\nKi: ' + args.integral + '\nKd: ' + args.derivative + '\nNiveau: ' + args.niveau + '\nDelay: ' + args.delay + '\n\n'
         with open(logFile, 'w') as l:
             l.write(header)
             l.write('time, corrected Value, current Value\n')
@@ -89,12 +91,12 @@ def debugMode(args):
             f.close()
 
             if args.verbose >= 2:
-                print(f'time: {time()-startTime}, corrected Value: {correctVal}, current Value: {currentVal}')
+                print('time: ' + time()-startTime + ', corrected Value: ' + correctVal + ', current Value: ' + currentVal + '')
 
             if args.log == True:
                 logFile = Path(args.log_file)
                 l = open(logFile, 'a')
-                l.write(f'{time()-startTime}, {correctVal}, {currentVal}\n')
+                l.write(str(time() - startTime) + ', ' + str(correctVal) + ', ' + str(currentVal) + '\n')
                 l.close()
             
             
@@ -136,9 +138,10 @@ def normalMode(args):
 
     # check if the pv is found
     if pv.connected or args.force:
-        print(f'PV: {args.pv} connected')
+        print('PV: ' + args.pv + ' connected')
     else:
-        print(f'PV: {args.pv} could not connect\nExiting...')
+        print('PV: ' + args.pv + ' not found')
+        print('Exiting...')
         exit()
 
     # TODOOOOOO: umrechnung von pos zu strom
@@ -198,10 +201,10 @@ def main():
     if args.log == True:
         if args.log_file.exists():
             if args.force:
-                print(f'Log file: {args.log_file} already exists\nOverwriting...')
+                print('Log file: ' + args.log_file + ' already exists\nOverwriting...')
                 remove(args.log_file)
             else:
-                print(f'Log file: {args.log_file} already exists')
+                print('Log file: ' + args.log_file + ' already exists')
                 print('Use the --force flag to overwrite the file')
                 print('Exiting...')
                 exit()
