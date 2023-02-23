@@ -106,6 +106,7 @@ def debugMode(args):
                 x.append(time() - startTime)
                 y1.append(correctVal)
                 y2.append(args.niveau)
+                y3.append(currentVal)
 
                 # makes sure that the graph doesnt grow infinitly
                 if len(x) >= graphLen:
@@ -114,12 +115,15 @@ def debugMode(args):
                     y1.pop(0)
                 if len(y2) >= graphLen:
                     y2.pop(0)
+                if len(y3) >= graphLen:
+                    y3.pop(0)
 
                 plt.cla() # clear axes
 
                 plt.title('correct: ' + str(correctVal))
                 plt.plot(x, y1, label='Value')
                 plt.plot(x, y2, label='Niveau')
+                plt.plot(x, y3, label='Current Value')
                 plt.legend(loc='upper left')
 
                 plt.pause(0.1)
