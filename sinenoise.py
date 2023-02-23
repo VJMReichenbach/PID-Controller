@@ -24,7 +24,8 @@ if __name__ == "__main__":
     parser.add_argument("-V", "--version", help="Print version and exit", action="version", version=ver)
     args = parser.parse_args()
 
-    x = 0 # in radians
+    x = 0
+
     if args.frequency < 0:
         print("Frequency must be positive")
         exit(1)
@@ -45,10 +46,10 @@ if __name__ == "__main__":
         while True:
             # Generate sine wave
             y = np.sin(2 * np.pi * args.frequency * x)
-            x = (x + args.frequency / 2*np.pi) % 2 * np.pi
+            x = x + 1/args.frequency
 
             if args.verbose > 0:
-                print("Frequency: " + args.frequency + "Hz, x: " + x + ", y: " + y + "")
+                print("Frequency: " + str(args.frequency) + " Hz, x: " + str(x) + ", y: " + str(y) + "")
 
             sleep(1/args.frequency)
 

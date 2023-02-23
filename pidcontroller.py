@@ -82,6 +82,7 @@ def debugMode(args):
     try:
         while True:
             currentVal = getCurrentVal(args=args, debugFile=debugFile)
+            fileVal = currentVal
 
             # get new value
             correctVal = float(pid(currentVal))
@@ -107,7 +108,7 @@ def debugMode(args):
                 x.append(time() - startTime)
                 y1.append(correctVal)
                 y2.append(args.niveau)
-                y3.append(currentVal)
+                y3.append(fileVal)
 
                 # makes sure that the graph doesnt grow infinitly
                 if len(x) >= graphLen:

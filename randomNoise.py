@@ -2,7 +2,7 @@
 import argparse
 from os import remove
 from pathlib import Path
-from time import sleep
+import time
 import numpy as np
 from epics import caput
 import subprocess
@@ -44,37 +44,45 @@ def getFromDebugFile(debugFile: str, lastVal: float, args) -> float:
 
     return content
 
-def readSinFile():
+def readSinFile(verbose: int):
     f = open('sin.txt', 'r')
     content = f.read()
     f.close()
+    if verbose >= 3:
+        print('sin.txt: ' + str(content))
     return content
 
-def generateNoise(no_delete: bool, file: str, noise_type: str, noise_strength: float, drift: float, frequency: int, fileVal: float) -> float:
+def generateNoise(i, y, count, no_delete: bool, file: str, noise_type: str, noise_strength: float, drift: float, period: float, fileVal: float, verbose: int) -> float:
+    time_start = time.time()
     # TODO: add other noise types (like sin and (sin+normal)/2)
     if noise_type == 'normal':
         # draws a random value from normal (Gaussian) distribution bewteen -1 and 1
         noise = noise_strength * np.random.normal(0,1,1)[0] + drift
-        noise = noise + fileVal
+        noise = float(noise) + float(fileVal)
     elif noise_type == 'sin':
-        # draws a random value from a sine wave bewteen -1 and 1
-        # TODOOO: give frequency as an argument and use it to calculate the noise
-        # TODOOO: random is always sine wave 
-        # TODO: call script
-        noise = readSinFile()
+        if i == 0:
+            lastSin = y[count-1]
+        else:
+            lastSin = y[i-1]
+        diff = y[i] - lastSin
+        i = i + 1
+        if i >= count:
+            i = 0
         # sleep 
-        sleep(1/frequency)
+        while time.time() - time_start < period/count:
+            pass
+        noise = diff + fileVal
     elif noise_type == 'mix':
         # draws a random value from a mixture of a normal distribution and a sine wave bewteen -1 and 1
         # by calling the normal and sin functions
-        normal_noise = generateNoise(no_delete=no_delete, file=file, noise_type='normal', noise_strength=noise_strength, drift=drift)
-        sin_noise = generateNoise(no_delete=no_delete, file=file, noise_type='sin', noise_strength=noise_strength, drift=drift, frequency=frequency)
+        normal_noise = generateNoise(i, y, count, no_delete=no_delete, file=file, noise_type='normal', noise_strength=noise_strength, drift=drift, period=period, fileVal=fileVal, verbose=verbose)
+        sin_noise = generateNoise(i, y, count, no_delete=no_delete, file=file, noise_type='sin', noise_strength=noise_strength, drift=drift, period=period, fileVal=fileVal, verbose=verbose)
         noise = (normal_noise + sin_noise) / 2
         noise = noise + fileVal
     else:
         print('Error: noise type ' + noise_type + ' not recognized')
         return 0
-    return noise 
+    return noise , i
 
 def debugMode(args):
     # check if debug file already exists
@@ -93,12 +101,18 @@ def debugMode(args):
 
     # set the last value to the niveau
     lastVal= 1.0
+    i = 0
+
+    count = 100
+    x = 2 * np.pi * np.arange(count) / count
+    y = args.amplitude * np.sin(x) + args.shift
 
     try:
         while True:
             # Writes a random value to the debugfile
             fileVal = getFromDebugFile(debugFile=debugFile, lastVal=lastVal, args=args)
-            noise = generateNoise(no_delete=args.no_delete, file=args.file, noise_type=args.noise_type, noise_strength=args.noise_strength, drift=args.drift, frequency=args.frequency, fileVal=fileVal)
+            fileVal = float(fileVal)
+            noise , i = generateNoise(i, y, count, no_delete=args.no_delete, file=args.file, noise_type=args.noise_type, noise_strength=args.noise_strength, drift=args.drift, period=args.period, fileVal=fileVal, verbose=args.verbose)
 
             # if the noise gets read incorrectly, use the last value
             if noise == '':
@@ -110,15 +124,18 @@ def debugMode(args):
             if args.verbose >= 3:
                 print('fileVal: ' + str(fileVal))
                 print('noise: ' + str(noise))
+                print('lastVal: ' + str(lastVal))
 
             # write the new value to the debug file
             writeToDebugFile(debugFile=debugFile, content=noise, args=args)
+            if args.verbose >= 3:
+                print('')
 
             # update the last value
             lastVal = noise
 
             # wait for the next iteration
-            sleep(args.delay)
+            time.sleep(args.delay)
     except KeyboardInterrupt:
         print('\nKeyboard interrupt detected\nExiting...')
         return 
@@ -138,7 +155,7 @@ def normalMode(args):
             r = lastVal + generateNoise(args=args)
             caput(args.pv, r)
             lastVal = r
-            sleep(args.delay)
+            time.sleep(args.delay)
     except KeyboardInterrupt:
         print('\nKeyboard interrupt detected\nExiting...')
         return
@@ -179,7 +196,9 @@ def main():
     parentParser.add_argument('--noise-strength', type=float, default=0.5, help='the strength of the noise. The default value is 0.5')
     parentParser.add_argument('--drift', type=float, default=0.0, help='the drift of the noise. The default value is 0.0')
     parentParser.add_argument('--noise-type', type=str, default='normal', help='the type of noise that should be generated. The default value is "normal" (a normal distribution). Alternativly, you can use "sin" for noise a sine wave like noise, or "mix for a bixture of both"')
-    parentParser.add_argument("--frequency", type=int, help="the frequency of the sine noise as int in Hz")
+    parentParser.add_argument("--period", type=float, default=10, help="the period of the sine wave in seconds. The default value is 10")
+    parentParser.add_argument('--shift', type=float, default=0.0, help='the shift of the sine wave. The default value is 0.0')
+    parentParser.add_argument('--amplitude', type=float, default=1.0, help='the amplitude of the sine wave. The default value is 1.0')
 
     # subcommands
     subparsers = parser.add_subparsers(dest='mode', help='the program can use an epics interface or create a debug enviroment for another script')
@@ -201,24 +220,24 @@ def main():
 
     args.file = str(args.file)
 
-    # start sine noise script with the given arguments if asked for
-    if args.noise_type == 'sin' or args.noise_type == 'mix':
-        cmd = ['python3', 'sinenoise.py', "--force"]
-        sleep(1)
-        if args.frequency:
-            cmd.append('--frequency')
-            cmd.append(str(args.frequency))
-        if args.verbose > 0:
-            print('Starting sine noise script with cmd:')
-            cmd_str = ''
-            for i in cmd:
-                cmd_str += i + ' '
-            print(cmd_str)
-        # start the sine noise script as a subprocess
-        subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # # start sine noise script with the given arguments if asked for
+    # if args.noise_type == 'sin' or args.noise_type == 'mix':
+    #     cmd = ['python3', 'sinenoise.py', "--force"]
+    #     sleep(1)
+    #     if args.frequency:
+    #         cmd.append('--frequency')
+    #         cmd.append(str(args.frequency))
+    #     if args.verbose > 0:
+    #         print('Starting sine noise script with cmd:')
+    #         cmd_str = ''
+    #         for i in cmd:
+    #             cmd_str += i + ' '
+    #         print(cmd_str)
+    #     # start the sine noise script as a subprocess
+    #     subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     # sleep shortly to let subprocess start
-    sleep(1)
+    # sleep(1)
 
     # start the given mode    
     if args.mode == 'debug':
