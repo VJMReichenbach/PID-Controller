@@ -59,11 +59,11 @@ def generateNoise(i, y, count, no_delete: bool, file: str, noise_type: str, nois
         noise = noise_strength * np.random.normal(0,1,1)[0] + drift
         noise = float(noise) + float(fileVal)
     elif noise_type == 'sin':
-        if i == 0:
-            lastSin = y[count-1]
+        if i == len(y) - 1:
+            other_sin = y[0]
         else:
-            lastSin = y[i-1]
-        diff = y[i] - lastSin
+            other_sin = y[i + 1]
+        diff = other_sin - y[i]
         i = i + 1
         if i >= count:
             i = 0
