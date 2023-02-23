@@ -16,7 +16,7 @@ License: GPLv3+
 """    
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=description, epilog=epilog, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("-f", "--frequency", help="Frequency of the sine wave in Hz. Default is 50", type=int, default=50)
     parser.add_argument("-o", "--output", help="Output file. Default is sin.txt", default=Path("sin.txt"))
     parser.add_argument("-F", "--force", help="Force overwrite of output file", action="store_true")
