@@ -50,11 +50,12 @@ def readSinFile():
     f.close()
     return content
 
-def generateNoise(no_delete: bool, file: str, noise_type: str, noise_strength: float, drift: float, frequency: int) -> float:
+def generateNoise(no_delete: bool, file: str, noise_type: str, noise_strength: float, drift: float, frequency: int, fileVal: float) -> float:
     # TODO: add other noise types (like sin and (sin+normal)/2)
     if noise_type == 'normal':
         # draws a random value from normal (Gaussian) distribution bewteen -1 and 1
         noise = noise_strength * np.random.normal(0,1,1)[0] + drift
+        noise = noise + fileVal
     elif noise_type == 'sin':
         # draws a random value from a sine wave bewteen -1 and 1
         # TODOOO: give frequency as an argument and use it to calculate the noise
@@ -69,6 +70,7 @@ def generateNoise(no_delete: bool, file: str, noise_type: str, noise_strength: f
         normal_noise = generateNoise(no_delete=no_delete, file=file, noise_type='normal', noise_strength=noise_strength, drift=drift)
         sin_noise = generateNoise(no_delete=no_delete, file=file, noise_type='sin', noise_strength=noise_strength, drift=drift, frequency=frequency)
         noise = (normal_noise + sin_noise) / 2
+        noise = noise + fileVal
     else:
         print('Error: noise type ' + noise_type + ' not recognized')
         return 0
@@ -96,7 +98,7 @@ def debugMode(args):
         while True:
             # Writes a random value to the debugfile
             fileVal = getFromDebugFile(debugFile=debugFile, lastVal=lastVal, args=args)
-            noise = generateNoise(no_delete=args.no_delete, file=args.file, noise_type=args.noise_type, noise_strength=args.noise_strength, drift=args.drift, frequency=args.frequency)
+            noise = generateNoise(no_delete=args.no_delete, file=args.file, noise_type=args.noise_type, noise_strength=args.noise_strength, drift=args.drift, frequency=args.frequency, file_val=fileVal)
 
             # if the noise gets read incorrectly, use the last value
             if noise == '':
@@ -108,13 +110,12 @@ def debugMode(args):
             if args.verbose >= 3:
                 print('fileVal: ' + str(fileVal))
                 print('noise: ' + str(noise))
-            r = float(fileVal) + float(noise)
 
             # write the new value to the debug file
-            writeToDebugFile(debugFile=debugFile, content=r, args=args)
+            writeToDebugFile(debugFile=debugFile, content=noise, args=args)
 
             # update the last value
-            lastVal = r
+            lastVal = noise
 
             # wait for the next iteration
             sleep(args.delay)
