@@ -214,6 +214,9 @@ def main():
         # start the sine noise script as a subprocess
         subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+    # sleep shortly to let subprocess start
+    sleep(1)
+
     # start the given mode    
     if args.mode == 'debug':
         debugMode(args)
