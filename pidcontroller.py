@@ -211,7 +211,7 @@ def normalMode(args):
 
                 plt.cla() # clear axes
 
-                plt.title('correct: ' + str(correctVal))
+                plt.title('PID-Controller')
                 plt.plot(x, y1, label='Current Position')
                 plt.plot(x, y2, label='Niveau')
                 plt.legend(loc='upper left')
