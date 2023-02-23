@@ -198,8 +198,6 @@ def main():
     
     args = parser.parse_args()
 
-    args.log_file = str(args.log_file)
-    args.file = str(args.file)
 
     if args.log == True:
         if args.log_file.exists():
@@ -211,6 +209,9 @@ def main():
                 print('Use the --force flag to overwrite the file')
                 print('Exiting...')
                 exit()
+
+    args.log_file = str(args.log_file)
+    args.file = str(args.file)
 
     if args.mode == 'debug':
         debugMode(args)
