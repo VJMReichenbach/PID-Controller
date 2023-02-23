@@ -74,8 +74,8 @@ def generateNoise(i, y, count, no_delete: bool, file: str, noise_type: str, nois
     elif noise_type == 'mix':
         # draws a random value from a mixture of a normal distribution and a sine wave bewteen -1 and 1
         # by calling the normal and sin functions
-        normal_noise , _ = generateNoise(i, y, count, no_delete=no_delete, file=file, noise_type='normal', noise_strength=noise_strength, drift=drift, period=period, fileVal=fileVal, verbose=verbose)
-        sin_noise , i = generateNoise(i, y, count, no_delete=no_delete, file=file, noise_type='sin', noise_strength=noise_strength, drift=drift, period=period, fileVal=fileVal, verbose=verbose)
+        normal_noise , _ = generateNoise(i, y, count, no_delete=no_delete, file=file, noise_type='normal', noise_strength=noise_strength, drift=drift, period=period, fileVal=0, verbose=verbose)
+        sin_noise , i = generateNoise(i, y, count, no_delete=no_delete, file=file, noise_type='sin', noise_strength=noise_strength, drift=drift, period=period, fileVal=0, verbose=verbose)
         noise = normal_noise + sin_noise
     else:
         print('Error: noise type ' + noise_type + ' not recognized')
