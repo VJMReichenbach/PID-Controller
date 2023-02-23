@@ -83,6 +83,8 @@ def debugMode(args):
 
     # create the debug file
     debugFile = Path(args.file)
+    # convert to str for python 3.5
+    debugFile = str(debugFile)
     writeToDebugFile(debugFile=debugFile, content=1, args=args)
 
     # set the last value to the niveau
