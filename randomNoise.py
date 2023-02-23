@@ -61,6 +61,8 @@ def generateNoise(no_delete: bool, file: str, noise_type: str, noise_strength: f
         # TODOOO: random is always sine wave 
         # TODO: call script
         noise = readSinFile()
+        # sleep 
+        sleep(1/frequency)
     elif noise_type == 'mix':
         # draws a random value from a mixture of a normal distribution and a sine wave bewteen -1 and 1
         # by calling the normal and sin functions
