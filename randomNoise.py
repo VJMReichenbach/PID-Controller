@@ -164,18 +164,18 @@ def normalMode(args):
                     print('Error while reading noise. Using 0')
                 noise = 0
 
-            # conversion to float because python threw an error otherwise
-            if args.verbose >= 3:
-                print('fileVal: ' + str(fileVal))
-                print('noise: ' + str(noise))
-                print('lastVal: ' + str(lastVal))
-
             # write new value to pv
             newVal = currentVal + noise
             caput(args.pv + ":outCur", newVal)
 
             # update the last value
             lastVal = noise
+
+            if args.verbose >= 1:
+                print('Old value: ' + str(currentVal))
+                print('Noise: ' + str(noise))
+                print('New value: ' + str(newVal))
+                print('')
 
             # wait for the next iteration
             time.sleep(args.delay)

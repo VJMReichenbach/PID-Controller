@@ -180,6 +180,7 @@ def normalMode(args):
             current_current = caget(args.pv + ':outCur')
             new_current = current_current - current_shift
             caput(args.pv + ':outCur', new_current)
+            
 
             if args.verbose >= 2:
                 print('time: ' + str(time()-startTime) + ', current_pos: ' + str(current_pos) + ', corrected_pos: ' + str(corrected_pos) + ', current_shift: ' + str(current_shift) + ', current_current: ' + str(current_current) + ', new_current: ' + str(new_current) + '')
