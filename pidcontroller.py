@@ -62,6 +62,7 @@ def debugMode(args):
     x = []
     y1 = []
     y2 = []
+    y3 = []
 
     plt.ion() # plot all graphs in the same window
 
