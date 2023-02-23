@@ -165,7 +165,7 @@ def normalMode(args):
                 noise = 0
 
             # write new value to pv
-            newVal = currentVal + noise
+            newVal = noise
             caput(args.pv + ":outCur", newVal)
 
             # update the last value
