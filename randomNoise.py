@@ -156,7 +156,7 @@ def normalMode(args):
             # get value from other script
             currentVal = caget(args.pv + ":outCur")
 
-            noise , i = generateNoise(i, y, count, no_delete=args.no_delete, file=args.file, noise_type=args.noise_type, noise_strength=args.noise_strength, drift=args.drift, period=args.period, fileVal=fileVal, verbose=args.verbose)
+            noise , i = generateNoise(i, y, count, False, "debugEnv.txt", noise_type=args.noise_type, noise_strength=args.noise_strength, drift=args.drift, period=args.period, fileVal=lastVal, verbose=args.verbose)
 
             # if the noise gets read incorrectly, use the last value
             if noise == '':
@@ -240,8 +240,10 @@ def main():
 
 
     args = parser.parse_args()
-
-    args.file = str(args.file)
+    try:
+        args.file = str(args.file)
+    except:
+        pass
 
     # # start sine noise script with the given arguments if asked for
     # if args.noise_type == 'sin' or args.noise_type == 'mix':

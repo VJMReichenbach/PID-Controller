@@ -52,7 +52,7 @@ if __name__ == '__main__':
     parser.add_argument('--graph_len', type=int, default=1000, help='Length of graph (default: 1000)')
     parser.add_argument('--no-delete', action='store_true', help='Do not delete old data')
     parser.add_argument('--no-log', action='store_true', help='Do not log data')
-    parser.add_argument('--log-file', type=str, default='log.txt', help='Log file name (default: log.txt)')
+    parser.add_argument('--log-file', type=str, default='plot_noise_log.txt', help='Log file name (default: plot_noise_log.txt)')
 
 
     args = parser.parse_args()
