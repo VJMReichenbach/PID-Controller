@@ -284,7 +284,10 @@ def main():
                 exit()
 
     args.log_file = str(args.log_file)
-    args.file = str(args.file)
+    try:
+        args.file = str(args.file)
+    except:
+        pass
 
     if args.mode == 'debug':
         debugMode(args)
