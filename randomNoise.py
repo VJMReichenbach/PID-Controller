@@ -4,7 +4,7 @@ from os import remove
 from pathlib import Path
 import time
 import numpy as np
-from epics import caput
+from epics import caput, caget
 import subprocess
 
 ver = "1.4.0"
@@ -54,7 +54,6 @@ def readSinFile(verbose: int):
 
 def generateNoise(i, y, count, no_delete: bool, file: str, noise_type: str, noise_strength: float, drift: float, period: float, fileVal: float, verbose: int) -> float:
     time_start = time.time()
-    # TODO: add other noise types (like sin and (sin+normal)/2)
     if noise_type == 'normal':
         # draws a random value from normal (Gaussian) distribution bewteen -1 and 1
         noise = noise_strength * np.random.normal(0,1,1)[0] + drift
@@ -75,10 +74,10 @@ def generateNoise(i, y, count, no_delete: bool, file: str, noise_type: str, nois
     elif noise_type == 'mix':
         # draws a random value from a mixture of a normal distribution and a sine wave bewteen -1 and 1
         # by calling the normal and sin functions
-        normal_noise = generateNoise(i, y, count, no_delete=no_delete, file=file, noise_type='normal', noise_strength=noise_strength, drift=drift, period=period, fileVal=fileVal, verbose=verbose)
-        sin_noise = generateNoise(i, y, count, no_delete=no_delete, file=file, noise_type='sin', noise_strength=noise_strength, drift=drift, period=period, fileVal=fileVal, verbose=verbose)
+        normal_noise , _ = generateNoise(i, y, count, no_delete=no_delete, file=file, noise_type='normal', noise_strength=noise_strength, drift=drift, period=period, fileVal=fileVal, verbose=verbose)
+        sin_noise , i = generateNoise(i, y, count, no_delete=no_delete, file=file, noise_type='sin', noise_strength=noise_strength, drift=drift, period=period, fileVal=fileVal, verbose=verbose)
         noise = (normal_noise + sin_noise) / 2
-        noise = noise + fileVal
+        noise = noise 
     else:
         print('Error: noise type ' + noise_type + ' not recognized')
         return 0
@@ -142,23 +141,47 @@ def debugMode(args):
 
 
 def normalMode(args):
-    if args.force == False:
-        print('normal mode is currently not tested. Use the --force flag to force the program to run')
-        print('Exiting...')
-        return
+    print('Starting in Normal Mode...')
 
-    lastVal = 0
+    # get first value
+    lastVal= caget(args.pv + ":outCur")
+    i = 0
+
+    count = 100
+    x = 2 * np.pi * np.arange(count) / count
+    y = args.amplitude * np.sin(x) + args.shift
 
     try:
         while True:
-            # Writes a random value to the debugfile
-            r = lastVal + generateNoise(args=args)
-            caput(args.pv, r)
-            lastVal = r
+            # get value from other script
+            currentVal = caget(args.pv + ":outCur")
+
+            noise , i = generateNoise(i, y, count, no_delete=args.no_delete, file=args.file, noise_type=args.noise_type, noise_strength=args.noise_strength, drift=args.drift, period=args.period, fileVal=fileVal, verbose=args.verbose)
+
+            # if the noise gets read incorrectly, use the last value
+            if noise == '':
+                if args.verbose >= 2:
+                    print('Error while reading noise. Using 0')
+                noise = 0
+
+            # conversion to float because python threw an error otherwise
+            if args.verbose >= 3:
+                print('fileVal: ' + str(fileVal))
+                print('noise: ' + str(noise))
+                print('lastVal: ' + str(lastVal))
+
+            # write new value to pv
+            newVal = currentVal + noise
+            caput(args.pv + ":outCur", newVal)
+
+            # update the last value
+            lastVal = noise
+
+            # wait for the next iteration
             time.sleep(args.delay)
     except KeyboardInterrupt:
         print('\nKeyboard interrupt detected\nExiting...')
-        return
+        return 
 
 def cleanup(no_delete: bool, file: str, noise_type: str, mode: str):
     if no_delete == False and mode == 'debug':

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 from os import remove
-import epics
+from epics import caget, caput
 from simple_pid import PID
 import argparse
 from pathlib import Path
@@ -43,8 +43,8 @@ def getCurrentVal(args, debugFile: str) -> float:
 
         return val
     elif args.mode == 'normal':
-        # TODO: check pv name
-        return epics.caget(args.pv + ':outCur')
+        # unused
+        return caget(args.pv)
     else:
         print('Something went wrong while parsing the arguments\nExiting...')
         exit()
@@ -54,10 +54,8 @@ def debugMode(args):
     debugFile = args.file
     args.pv = 'debug'
     getCurrentVal(args=args, debugFile=debugFile)
-    # TODOO: find sample time and parameters
+
     pid = PID(Kp=args.proportional, Kd=args.derivative, Ki=args.integral, setpoint=args.niveau)
-    # pid.sample_time = 0.0005
-    # pid.output_limits = (args.min, args.max)
 
     x = []
     y1 = []
@@ -85,7 +83,7 @@ def debugMode(args):
             fileVal = currentVal
 
             # get new value
-            correctVal = float(pid(currentVal))
+            correctVal = float(pid(currentVal)) + currentVal
 
             # wrtie new value to debug file
             f = open(debugFile, 'w')
@@ -133,28 +131,96 @@ def debugMode(args):
             sleep(args.delay)
     except KeyboardInterrupt:
         print('\nKeyboard interrupt detected\nExiting...')
-        #TODO: necessary cleanup?
         exit()
 
+def deltaI(deltaX):
+    return -0.021836 * deltaX
 
 
 
 def normalMode(args):
-    pv = epics.PV(args.pv)
+    currentVal = caget(args.pv + ':outCur')
 
-    # check if the pv is found
-    if pv.connected or args.force:
-        print('PV: ' + args.pv + ' connected')
-    else:
-        print('PV: ' + args.pv + ' not found')
-        print('Exiting...')
+    pid = PID(Kp=args.proportional, Kd=args.derivative, Ki=args.integral, setpoint=args.niveau)
+
+    x = []
+    y1 = []
+    y2 = []
+    y3 = []
+
+    plt.ion() # plot all graphs in the same window
+
+    startTime = time()
+
+    graphLen = 80
+
+    # log options
+    if args.log == True:
+        logFile = args.log_file
+        header = 'PID-Controller Log File\nPV: ' + str(args.pv) + '\nKp: ' + str(args.proportional) + '\nKi: ' + str(args.integral) + '\nKd: ' + str(args.derivative) + '\nNiveau: ' + str(args.niveau) + '\nDelay: ' + str(args.delay) + '\n\n'
+        with open(logFile, 'w') as l:
+            l.write(header)
+            l.write('time, current pos, corrected pos, current shift, current current, new current')
+            l.close()
+
+    try:
+        while True:
+            f = open('position.txt', 'r')
+            current_pos = float(f.read())
+            f.close()
+
+            # get new value
+            corrected_pos = float(pid(current_pos)) + current_pos
+
+            pos_shift = corrected_pos - current_pos
+
+            current_shift = deltaI(pos_shift)
+
+            # write new value to pv
+            current_current = caget(args.pv + ':outCur')
+            new_current = current_current - current_shift
+            caput(args.pv + ':outCur', new_current)
+
+            if args.verbose >= 2:
+                print('time: ' + str(time()-startTime) + ', current_pos: ' + str(current_pos) + ', corrected_pos: ' + str(corrected_pos) + ', current_shift: ' + str(current_shift) + ', current_current: ' + str(current_current) + ', new_current: ' + str(new_current) + '')
+
+            if args.log == True:
+                logFile = args.log_file
+                l = open(logFile, 'a')
+                l.write(str(time() - startTime) + ', ' + str(current_pos) + ', ' + str(corrected_pos) + ', ' + str(current_shift) + ', ' + str(current_current) + ', ' + str(new_current) + '\n')
+                l.close()
+            
+            
+            # plotting
+            if args.visualize == True:
+
+                x.append(time() - startTime)
+                y1.append(current_pos)
+                y2.append(args.niveau)
+
+                # makes sure that the graph doesnt grow infinitly
+                if len(x) >= graphLen:
+                    x.pop(0)
+                if len(y1) >= graphLen:
+                    y1.pop(0)
+                if len(y2) >= graphLen:
+                    y2.pop(0)
+                if len(y3) >= graphLen:
+                    y3.pop(0)
+
+                plt.cla() # clear axes
+
+                plt.title('correct: ' + str(correctVal))
+                plt.plot(x, y1, label='Current Position')
+                plt.plot(x, y2, label='Niveau')
+                plt.legend(loc='upper left')
+
+                plt.pause(0.1)
+
+            sleep(args.delay)
+    except KeyboardInterrupt:
+        print('\nKeyboard interrupt detected\nExiting...')
         exit()
-
-    # TODOOOOOO: umrechnung von pos zu strom
-    # TODOOO: Epics interface
-    print('EPICS interface not yet implemented')
-    exit()
-
 
 def main():
     parser = argparse.ArgumentParser(
